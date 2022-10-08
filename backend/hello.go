@@ -3,6 +3,10 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"html"
+	"io/ioutil"
+	"log"
+	"net/http"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -27,6 +31,10 @@ type User struct {
 	Phone string
 }
 
+type Img struct {
+	Id int
+}
+
 var u *User = new(User)
 
 func queryRow() {
@@ -40,8 +48,8 @@ func queryRow() {
 	fmt.Printf("id: %d, name: %s, phone: %s\n", u.Id, u.Name, u.Phone)
 }
 
-func queryMultiRow() {
-	rows, err := db.Query("select * from user")
+func queryMultiRow(name string) {
+	rows, err := db.Query("select * from user where name = ?", name)
 	if err != nil {
 		fmt.Println("query failed, err:%v\n", err)
 		return
@@ -100,15 +108,63 @@ func deleteRow() {
 	fmt.Printf("delete success, affected rows:%d\n", n)
 }
 
+func uploadFile(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("File Upload Endpoint Hit")
+
+	// Parse our multipart form, 10 << 20 specifies a maximum
+	// upload of 10 MB files.
+	r.ParseMultipartForm(10 << 20)
+	// FormFile returns the first file for the given key `myFile`
+	// it also returns the FileHeader so we can get the Filename,
+	// the Header and the size of the file
+	file, handler, err := r.FormFile("myFile")
+	if err != nil {
+		fmt.Println("Error Retrieving the File")
+		fmt.Println(err)
+		return
+	}
+	defer file.Close()
+	fmt.Printf("Uploaded File: %+v\n", handler.Filename)
+	fmt.Printf("File Size: %+v\n", handler.Size)
+	fmt.Printf("MIME Header: %+v\n", handler.Header)
+
+	// Create a temporary file within our temp-images directory that follows
+	// a particular naming pattern
+	tempFile, err := ioutil.TempFile("data", "upload-*.png")
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer tempFile.Close()
+
+	// read all of the contents of our uploaded file into a
+	// byte array
+	fileBytes, err := ioutil.ReadAll(file)
+	if err != nil {
+		fmt.Println(err)
+	}
+	// write this byte array to our temporary file
+	tempFile.Write(fileBytes)
+	// return that we have successfully uploaded our file!
+	fmt.Fprintf(w, "Successfully Uploaded File\n")
+}
+
 func main() {
 	err := initDB()
 	if err != nil {
 		fmt.Printf("init db failed, err: %v\n", err)
 		return
 	}
-	queryRow()
-	queryMultiRow()
-	insertRow()
-	updateRow()
-	deleteRow()
+	// queryRow()
+	// queryMultiRow()
+	// insertRow()
+	// updateRow()
+	// deleteRow()
+
+	http.HandleFunc("/get/name", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
+	})
+
+	http.HandleFunc("/postimg", uploadFile)
+
+	log.Fatal(http.ListenAndServe(":4000", nil))
 }
