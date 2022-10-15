@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -109,6 +110,20 @@ func insertProductRow(category string, description string, price float64) {
 	fmt.Printf("insert success, the category is %s\n", category)
 }
 
+func insertImgRow(filename string, userid string) {
+	ret, err := db.Exec("insert into img_res(filename, userid) values (?,?)", filename, userid)
+	if err != nil {
+		fmt.Printf("insert failed, err:%v\n", err)
+		return
+	}
+	_, err = ret.LastInsertId()
+	if err != nil {
+		fmt.Printf("get lastinsert ID failed, err:%v\n", err)
+		return
+	}
+	fmt.Printf("insert success, the filename is %s\n", filename)
+}
+
 func updateRow() {
 	ret, err := db.Exec("update user set name = ? where id = ?", "Tom", 1)
 	if err != nil {
@@ -146,12 +161,60 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 	// it also returns the FileHeader so we can get the Filename,
 	// the Header and the size of the file
 	file, handler, err := r.FormFile("myFile")
+	userId := r.FormValue("userid")
+
 	if err != nil {
 		fmt.Println("Error Retrieving the File")
 		fmt.Println(err)
 		return
 	}
+
 	defer file.Close()
+	fmt.Printf("userid: %s\n", userId)
+	fmt.Printf("Uploaded File: %+v\n", handler.Filename)
+	fmt.Printf("File Size: %+v\n", handler.Size)
+	fmt.Printf("MIME Header: %+v\n", handler.Header)
+
+	// Create a temporary file within our temp-images directory that follows
+	// a particular naming pattern
+	tempFile, err := ioutil.TempFile("data", "upload-*.png")
+	filename := strings.Split(tempFile.Name(), "/")[1]
+
+	insertImgRow(filename, userId)
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer tempFile.Close()
+
+	// read all of the contents of our uploaded file into a
+	// byte array
+	fileBytes, err := ioutil.ReadAll(file)
+	if err != nil {
+		fmt.Println(err)
+	}
+	// write this byte array to our temporary file
+	tempFile.Write(fileBytes)
+	// return that we have successfully uploaded our file!
+	fmt.Fprintf(w, "Successfully Uploaded File\n")
+}
+
+func getFile(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("File Upload Endpoint Hit")
+	// Parse our multipart form, 10 << 20 specifies a maximum
+	// upload of 10 MB files.
+	r.ParseMultipartForm(10 << 20)
+	// FormFile returns the first file for the given key `myFile`
+	// it also returns the FileHeader so we can get the Filename,
+	// the Header and the size of the file
+	file, handler, err := r.FormFile("myFile")
+	if err != nil {
+		fmt.Println("Error Retrieving the File")
+		fmt.Println(err)
+		return
+	}
+
+	defer file.Close()
+
 	fmt.Printf("Uploaded File: %+v\n", handler.Filename)
 	fmt.Printf("File Size: %+v\n", handler.Size)
 	fmt.Printf("MIME Header: %+v\n", handler.Header)
@@ -261,6 +324,7 @@ func main() {
 	http.HandleFunc("/insertuser", insertUser)
 	http.HandleFunc("/insertproduct", insertProduct)
 	http.HandleFunc("/postimg", uploadFile)
+	http.HandleFunc("/getimg", getFile)
 
 	log.Fatal(http.ListenAndServe(":4000", nil))
 }

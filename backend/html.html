@@ -59,16 +59,17 @@
   </script>
   <body>
     <br>
-    <form
-      enctype="multipart/form-data"
-      action="http://localhost:4000/postimg"
-      method="post"
-    >
+    <div>
+      <form
+        enctype="multipart/form-data"
+        action="http://localhost:4000/postimg"
+        method="post">
       <input type="file" name="myFile" />
-      <input type="submit" value="upload" />
+      <button type="submit" value="upload" id=""> Submit
     </form>
-    <br>
-    person name: <input type="text" id="searchusername">
+    </div>
+
+    <p>person name: <input type="text" id="searchusername"></p>
     <button id="search_user_button">click me to search for a person</button>
     <br>
     <br>
