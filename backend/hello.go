@@ -2,14 +2,19 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
-	"html"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 
 	_ "github.com/go-sql-driver/mysql"
 )
+
+func enableCors(w *http.ResponseWriter) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+}
 
 var db *sql.DB = new(sql.DB)
 
@@ -25,59 +30,83 @@ func initDB() (err error) {
 	return nil
 }
 
-type User struct {
-	Id    int
-	Name  string
-	Phone string
-}
-
 type Img struct {
-	Id int
+	Filename string
+	UserId   int
 }
 
-var u *User = new(User)
+type UserInfo struct {
+	Id       int
+	Username string
+	Password string
+	Userid   int
+}
 
-func queryRow() {
+type ProductInfo struct {
+	Category    string
+	Description string
+	Price       float64
+}
+
+func queryUserRowByName(searchName any) UserInfo {
 	// 该查询语句等价于select id,name,phone from user where id = 1;
-	err := db.QueryRow("select id,name,phone from user where id=?", 1).Scan(&u.Id, &u.Name, &u.Phone)
+	var id int
+	var username string
+	var pw string
+	var userid int
+	err := db.QueryRow("select id,username,password,userid from user where username=?", searchName).Scan(&id, &username, &pw, &userid)
+	userInfo := UserInfo{Id: id, Username: username, Password: pw, Userid: userid}
 	if err != nil {
 		fmt.Printf("scan failed, err: %v\n", err)
-		return
+		return userInfo
 	}
 	fmt.Println("query success!")
-	fmt.Printf("id: %d, name: %s, phone: %s\n", u.Id, u.Name, u.Phone)
+	fmt.Printf("id: %d, username: %s, password: %s, userid: %d\n", userInfo.Id, userInfo.Username, userInfo.Password, userInfo.Userid)
+	return userInfo
 }
 
-func queryMultiRow(name string) {
-	rows, err := db.Query("select * from user where name = ?", name)
+func queryProductRowByName(searchCat any) ProductInfo {
+	// 该查询语句等价于select id,name,phone from user where id = 1;
+	var description string
+	var category string
+	var price float64
+	err := db.QueryRow("select category, description, price from product_info where category=?", searchCat).Scan(&category, &description, &price)
+	productInfo := ProductInfo{Category: category, Description: description, Price: price}
 	if err != nil {
-		fmt.Println("query failed, err:%v\n", err)
-		return
+		fmt.Printf("scan failed, err: %v\n", err)
+		return productInfo
 	}
-	defer rows.Close()
 	fmt.Println("query success!")
-	for rows.Next() {
-		err := rows.Scan(&u.Id, &u.Name, &u.Phone)
-		if err != nil {
-			fmt.Printf("scan failed, err:%v\n", err)
-			return
-		}
-		fmt.Printf("id: %d, name: %s, phone: %s\n", u.Id, u.Name, u.Phone)
-	}
+	fmt.Printf("category: %s, description: %s, price: %f\n", category, description, price)
+	return productInfo
 }
 
-func insertRow() {
-	ret, err := db.Exec("insert into user(name, phone) values (?,?)", "zhaoliu", "123456")
+func insertUserRow(id int, username string, password string, userid int) {
+	ret, err := db.Exec("insert into user(id, username, password, userid) values (?,?,?,?)", id, username, password, userid)
 	if err != nil {
 		fmt.Printf("insert failed, err:%v\n", err)
 		return
 	}
-	id, err := ret.LastInsertId()
+	_, err = ret.LastInsertId()
 	if err != nil {
 		fmt.Printf("get lastinsert ID failed, err:%v\n", err)
 		return
 	}
 	fmt.Printf("insert success, the id is %d\n", id)
+}
+
+func insertProductRow(category string, description string, price float64) {
+	ret, err := db.Exec("insert into product_info(category, description, price) values (?,?,?)", category, description, price)
+	if err != nil {
+		fmt.Printf("insert failed, err:%v\n", err)
+		return
+	}
+	_, err = ret.LastInsertId()
+	if err != nil {
+		fmt.Printf("get lastinsert ID failed, err:%v\n", err)
+		return
+	}
+	fmt.Printf("insert success, the category is %s\n", category)
 }
 
 func updateRow() {
@@ -110,7 +139,6 @@ func deleteRow() {
 
 func uploadFile(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("File Upload Endpoint Hit")
-
 	// Parse our multipart form, 10 << 20 specifies a maximum
 	// upload of 10 MB files.
 	r.ParseMultipartForm(10 << 20)
@@ -148,22 +176,90 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Successfully Uploaded File\n")
 }
 
+func searchUserByName(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("searching user!")
+	enableCors(&w)
+	w.WriteHeader(http.StatusCreated)
+	w.Header().Set("Content-Type", "application/json")
+
+	r.ParseForm()
+	name := r.FormValue("username")
+	fmt.Println(name)
+	person := queryUserRowByName(name)
+	jsonResp, err := json.Marshal(person)
+	if err != nil {
+		log.Fatalf("Error happened in JSON marshal. Err: %s", err)
+	}
+	var a = make(map[string]any)
+	json.Unmarshal(jsonResp, &a)
+	fmt.Println(a)
+	w.Write(jsonResp)
+}
+
+func searchProductByName(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("searching user!")
+	enableCors(&w)
+	w.WriteHeader(http.StatusCreated)
+	w.Header().Set("Content-Type", "application/json")
+
+	r.ParseForm()
+	category := r.FormValue("category")
+	fmt.Println(category)
+	productInfo := queryProductRowByName(category)
+	jsonResp, err := json.Marshal(productInfo)
+	if err != nil {
+		log.Fatalf("Error happened in JSON marshal. Err: %s", err)
+	}
+	var a = make(map[string]any)
+	json.Unmarshal(jsonResp, &a)
+	fmt.Println(a)
+	w.Write(jsonResp)
+}
+
+func insertUser(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("inserting user!")
+	enableCors(&w)
+	w.WriteHeader(http.StatusCreated)
+	w.Header().Set("Content-Type", "application/json")
+	r.ParseForm()
+	username := r.FormValue("username")
+	userid := r.FormValue("userid")
+	pw := r.FormValue("password")
+	id := r.FormValue("id")
+	intId, _ := strconv.Atoi(userid)
+	intUserid, _ := strconv.Atoi(id)
+	insertUserRow(intId, username, pw, intUserid)
+}
+
+func insertProduct(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("inserting product!")
+	enableCors(&w)
+	w.WriteHeader(http.StatusCreated)
+	w.Header().Set("Content-Type", "application/json")
+	r.ParseForm()
+	category := r.FormValue("category")
+	description := r.FormValue("description")
+	price := r.FormValue("price")
+	intPrice, _ := strconv.ParseFloat(price, 64)
+	insertProductRow(category, description, intPrice)
+}
+
 func main() {
 	err := initDB()
 	if err != nil {
 		fmt.Printf("init db failed, err: %v\n", err)
 		return
 	}
-	// queryRow()
+	// queryRowByName("Tom")
 	// queryMultiRow()
 	// insertRow()
 	// updateRow()
 	// deleteRow()
 
-	http.HandleFunc("/get/name", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
-	})
-
+	http.HandleFunc("/getuser", searchUserByName)
+	http.HandleFunc("/getproduct", searchProductByName)
+	http.HandleFunc("/insertuser", insertUser)
+	http.HandleFunc("/insertproduct", insertProduct)
 	http.HandleFunc("/postimg", uploadFile)
 
 	log.Fatal(http.ListenAndServe(":4000", nil))
