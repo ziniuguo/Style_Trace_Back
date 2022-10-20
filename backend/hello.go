@@ -280,8 +280,8 @@ func insertUser(w http.ResponseWriter, r *http.Request) {
 	userid := r.FormValue("userid")
 	pw := r.FormValue("password")
 	id := r.FormValue("id")
-	intId, _ := strconv.Atoi(userid)
-	intUserid, _ := strconv.Atoi(id)
+	intId, _ := strconv.Atoi(id)
+	intUserid, _ := strconv.Atoi(userid)
 	insertUserRow(intId, username, pw, intUserid)
 }
 
