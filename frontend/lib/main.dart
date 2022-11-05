@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'running_widget.dart';
 
-var ic = const Icon(Icons.ac_unit);
 void main() {
   runApp(const NavContainer());
 }
@@ -11,54 +10,62 @@ class NavContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: NavApp());
+    return const MaterialApp(home: IndexedStackPage());
   }
 }
 
-class NavApp extends StatefulWidget {
-  const NavApp({super.key});
+class IndexedStackPage extends StatefulWidget {
+  const IndexedStackPage({super.key});
 
   @override
-  State<NavApp> createState() => _NavAppState();
+  State<IndexedStackPage> createState() => _IndexedStackPageState();
 }
 
-class _NavAppState extends State<NavApp> {
-  int currentPageIndex = 0;
+class _IndexedStackPageState extends State<IndexedStackPage> {
+  int currentIndex = 0;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      body: IndexedStack(
+        alignment: Alignment.center,
+        index: currentIndex,
+        children: [
+          Container(
+            color: Colors.red,
+            alignment: Alignment.center,
+            child: const Text('Page 1'),
+          ),
+          RunningWidget.infScroller,
+          RunningWidget.imgScanner,
+        ],
+      ),
       bottomNavigationBar: NavigationBar(
         onDestinationSelected: (int index) {
           setState(() {
-            currentPageIndex = index;
+            currentIndex = index;
           });
         },
-        selectedIndex: currentPageIndex,
+        selectedIndex: currentIndex,
         destinations: const <Widget>[
-          NavigationDestination(
-            icon: Icon(Icons.explore),
-            label: 'Explore',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.commute),
-            label: 'Commute',
-          ),
-          NavigationDestination(
-            selectedIcon: Icon(Icons.bookmark),
-            icon: Icon(Icons.bookmark_border),
-            label: 'Saved',
-          ),
+          NavigationDestination(icon: Icon(Icons.explore), label: 'Explore'),
+          NavigationDestination(icon: Icon(Icons.home), label: 'Commute'),
+          NavigationDestination(icon: Icon(Icons.people), label: 'Saved')
         ],
       ),
-      body: <Widget>[
-        Container(
-          color: Colors.red,
-          alignment: Alignment.center,
-          child: const Text('Page 1'),
-        ),
-        RunningWidget.infScroller,
-        RunningWidget.imgScanner,
-      ][currentPageIndex],
+      // bottomNavigationBar: BottomNavigationBar(
+      //   onTap: (value) {
+      //     // 点击事件，用于改变当前索引，然后刷新
+      //     currentIndex = value;
+      //     setState(() {});
+      //   },
+      //   currentIndex: currentIndex,
+      //   items: const [
+      //     BottomNavigationBarItem(icon: Icon(Icons.home), label: "Main"),
+      //     BottomNavigationBarItem(icon: Icon(Icons.people), label: "Me"),
+      //     BottomNavigationBarItem(icon: Icon(Icons.explore), label: "Message"),
+      //   ],
+      // ),
     );
   }
 }

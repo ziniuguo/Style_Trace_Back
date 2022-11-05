@@ -52,15 +52,15 @@ class ImgScanner extends StatelessWidget {
                       (states) => const BorderSide(color: Color(0xFFBC764A))),
             ),
           )),
-      home: const HomePage(title: 'Image Cropper Demo'),
+      home: const ScannerPage(title: 'Image Cropper Demo'),
     );
   }
 }
 
-class HomePage extends StatefulWidget {
+class ScannerPage extends StatefulWidget {
   final String title;
 
-  const HomePage({
+  const ScannerPage({
     Key? key,
     required this.title,
   }) : super(key: key);
@@ -68,10 +68,10 @@ class HomePage extends StatefulWidget {
 
   // _HomePageState createState() => _HomePageState();
   @override
-  _HomePageState createState() => _HomePageState();
+  _ScannerPageState createState() => _ScannerPageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _ScannerPageState extends State<ScannerPage> {
   XFile? _pickedFile;
   CroppedFile? _croppedFile;
 
