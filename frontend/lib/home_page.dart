@@ -37,35 +37,31 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Welcome to Flutter',
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Welcome to Flutter'),
-        ),
-        body: Center(child: RandomWords(_controller)),
-        floatingActionButton: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 100),
-          transitionBuilder: (Widget child, Animation<double> animation) {
-            return ScaleTransition(scale: animation, child: child);
-          },
-          child: _isVisible
-              ? FloatingActionButton(
-                  key: ValueKey(_isVisible),
-                  onPressed: () {
-                    debugL("Button triggered, scrolling back to top...");
-                    SchedulerBinding.instance.addPostFrameCallback((_) {
-                      _controller.animateTo(
-                          _controller.position.minScrollExtent,
-                          duration: const Duration(milliseconds: 400),
-                          curve: Curves.fastOutSlowIn);
-                    });
-                  },
-                  backgroundColor: Colors.green,
-                  child: const Icon(Icons.navigation),
-                )
-              : null,
-        ),
+    return Scaffold(
+      // appBar: AppBar(
+      //   title: const Text('Welcome to Flutter2222'),
+      // ),
+      body: Center(child: RandomWords(_controller)),
+      floatingActionButton: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 100),
+        transitionBuilder: (Widget child, Animation<double> animation) {
+          return ScaleTransition(scale: animation, child: child);
+        },
+        child: _isVisible
+            ? FloatingActionButton(
+                key: ValueKey(_isVisible),
+                onPressed: () {
+                  debugL("Button triggered, scrolling back to top...");
+                  SchedulerBinding.instance.addPostFrameCallback((_) {
+                    _controller.animateTo(_controller.position.minScrollExtent,
+                        duration: const Duration(milliseconds: 400),
+                        curve: Curves.fastOutSlowIn);
+                  });
+                },
+                backgroundColor: Colors.green,
+                child: const Icon(Icons.navigation),
+              )
+            : null,
       ),
     );
   }
