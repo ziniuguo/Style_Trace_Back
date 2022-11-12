@@ -3,18 +3,17 @@ package main
 //#include <stdlib.h>
 import (
 	"bufio"
-	"fmt"
 	"io"
 	"os/exec"
 )
 
-func main() {
-	cmd := exec.Command("python3.10", "predictor.py", "--file", "upload-400237171.png")
+func predict(path string) string {
+	cmd := exec.Command("python3.10", "predictor.py", "--file", path)
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
 		panic(err)
 	}
-	stderr, err := cmd.StderrPipe()
+	_, err = cmd.StderrPipe()
 	if err != nil {
 		panic(err)
 	}
@@ -25,18 +24,17 @@ func main() {
 
 	// var text string = copyOutput(stdout)
 	// fmt.Println(text)
-	go copyOutput(stdout)
-	go copyOutput(stderr)
+	str := copyOutput(stdout)
+	return str
 
-	cmd.Wait()
 	// cmd.Process.Kill()
 }
 
 func copyOutput(r io.Reader) string {
 	scanner := bufio.NewScanner(r)
 	for scanner.Scan() {
-		fmt.Println(scanner.Text())
-		// return scanner.Text()
+		// fmt.Println(scanner.Text())
+		return scanner.Text()
 	}
 	return ""
 }

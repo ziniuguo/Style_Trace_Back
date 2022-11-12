@@ -28,7 +28,15 @@ img = img.resize((128, 128))  # L: greyscale mode   P: color mode
 img = np.array(img).astype(np.float32)
 
 imgs = np.array([img])
-result = model.predict(imgs)
-print(result)
+result = model.predict(imgs, verbose=0)
+scores = result[0]
+
+index = 0
+max_score = 0
+for i in range(len(scores)):
+    if max_score < scores[i]:
+        max_score = scores[i]
+        index = i
+print(index)
 
 # model.summary()t
