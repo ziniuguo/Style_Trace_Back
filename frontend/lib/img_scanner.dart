@@ -9,8 +9,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 
 
-class ImgScanner extends StatelessWidget {
-  const ImgScanner({Key? key}) : super(key: key);
+class ImgScanPage extends StatelessWidget {
+  const ImgScanPage({Key? key}) : super(key: key);
 
   // This widget is the root of your application.
   @override

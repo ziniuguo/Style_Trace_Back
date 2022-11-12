@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'running_widget.dart';
+import 'package:styletraceback/img_scanner.dart';
+import 'package:styletraceback/home_page.dart';
 
 void main() {
   runApp(const NavContainer());
@@ -36,8 +37,9 @@ class _IndexedStackPageState extends State<IndexedStackPage> {
             alignment: Alignment.center,
             child: const Text('Page 1'),
           ),
-          RunningWidget.infScroller,
-          RunningWidget.imgScanner,
+          // RunningWidget.homePage,
+          const HomePage(),
+          const ImgScanPage(),
         ],
       ),
       bottomNavigationBar: NavigationBar(
@@ -49,13 +51,12 @@ class _IndexedStackPageState extends State<IndexedStackPage> {
         selectedIndex: currentIndex,
         destinations: const <Widget>[
           NavigationDestination(icon: Icon(Icons.explore), label: 'Explore'),
-          NavigationDestination(icon: Icon(Icons.home), label: 'Commute'),
+          NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
           NavigationDestination(icon: Icon(Icons.people), label: 'Saved')
         ],
       ),
       // bottomNavigationBar: BottomNavigationBar(
       //   onTap: (value) {
-      //     // 点击事件，用于改变当前索引，然后刷新
       //     currentIndex = value;
       //     setState(() {});
       //   },

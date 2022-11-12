@@ -1,9 +1,10 @@
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
-import 'controller.dart';
 
 class RandomWords extends StatefulWidget {
-  const RandomWords({super.key});
+  const RandomWords(this.controller, {super.key});
+  final ScrollController controller;
+
   @override
   State<RandomWords> createState() => _RandomWordsState();
 }
@@ -15,7 +16,7 @@ class _RandomWordsState extends State<RandomWords> {
   @override
   Widget build(BuildContext context) {
     ListView listView = ListView.builder(
-      controller: Controller.controller,
+      controller: widget.controller,
       // itemCount: 20,
 
       padding: const EdgeInsets.all(16.0),

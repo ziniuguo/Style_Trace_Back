@@ -1,44 +1,31 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'controller.dart';
 import 'random_words.dart';
 
-class InfScroller extends StatefulWidget {
-  const InfScroller({super.key});
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
 
   @override
-  _InfScrollerState createState() => _InfScrollerState();
+  _HomePageState createState() => _HomePageState();
 }
 
-class _InfScrollerState extends State<InfScroller> {
+class _HomePageState extends State<HomePage> {
   var _isVisible = false;
+  final _controller = ScrollController();
 
   @override
   void initState() {
     super.initState();
-    Controller.controller.addListener(() {
-      if (Controller.controller.position.userScrollDirection ==
-          ScrollDirection.reverse) {
-        if (_isVisible == true) {
-          setState(() {
-            _isVisible = false;
-          });
-        }
-        debugL("scrolling reverse! current state: $_isVisible");
-      } else if (Controller.controller.position.userScrollDirection ==
-          ScrollDirection.forward) {
+    _controller.addListener(() {
+      if (_controller.offset > // 100 + 0
+          100 + _controller.position.minScrollExtent) {
         if (_isVisible == false) {
           setState(() {
             _isVisible = true;
           });
         }
-        debugL("scrolling forward! current state: $_isVisible");
-      }
-      if (Controller.controller.offset <
-          100 + Controller.controller.position.minScrollExtent) {
-        debugL("offset: ${Controller.controller.offset}");
+      } else {
         if (_isVisible == true) {
           setState(() {
             _isVisible = false;
@@ -56,7 +43,7 @@ class _InfScrollerState extends State<InfScroller> {
         appBar: AppBar(
           title: const Text('Welcome to Flutter'),
         ),
-        body: const Center(child: RandomWords()),
+        body: Center(child: RandomWords(_controller)),
         floatingActionButton: AnimatedSwitcher(
           duration: const Duration(milliseconds: 100),
           transitionBuilder: (Widget child, Animation<double> animation) {
@@ -68,8 +55,8 @@ class _InfScrollerState extends State<InfScroller> {
                   onPressed: () {
                     debugL("Button triggered, scrolling back to top...");
                     SchedulerBinding.instance.addPostFrameCallback((_) {
-                      Controller.controller.animateTo(
-                          Controller.controller.position.minScrollExtent,
+                      _controller.animateTo(
+                          _controller.position.minScrollExtent,
                           duration: const Duration(milliseconds: 400),
                           curve: Curves.fastOutSlowIn);
                     });
@@ -86,6 +73,6 @@ class _InfScrollerState extends State<InfScroller> {
 
 void debugL(Object o) {
   if (kDebugMode) {
-    print("inf_scroller.dart: - $o");
+    print("home_page.dart: - $o");
   }
 }
