@@ -49,6 +49,14 @@ type ProductInfo struct {
 	Price       float64
 }
 
+type BrandInfo struct {
+	Name         string
+	Description  string
+	ImgUrl       string
+	OnlinePrice  string
+	OfflinePrice string
+}
+
 func queryUserRowByName(searchName any) UserInfo {
 	var id int
 	var username string
@@ -61,7 +69,7 @@ func queryUserRowByName(searchName any) UserInfo {
 		return userInfo
 	}
 	fmt.Println("query success!")
-	fmt.Printf("id: %d, username: %s, password: %s, userid: %d\n", userInfo.Id, userInfo.Username, userInfo.Password, userInfo.Userid)
+	// fmt.Printf("id: %d, username: %s, password: %s, userid: %d\n", userInfo.Id, userInfo.Username, userInfo.Password, userInfo.Userid)
 	return userInfo
 }
 
@@ -76,7 +84,7 @@ func queryProductRowByName(searchCat any) ProductInfo {
 		return productInfo
 	}
 	fmt.Println("query success!")
-	fmt.Printf("category: %s, description: %s, price: %f\n", category, description, price)
+	// fmt.Printf("category: %s, description: %s, price: %f\n", category, description, price)
 	return productInfo
 }
 
@@ -99,6 +107,23 @@ func queryImgRowByUserId(userId int) []string {
 
 	fmt.Println("query success!")
 	return files
+}
+
+func queryClassByRow(brandName string) BrandInfo {
+	var name string
+	var description string
+	var imgUrl string
+	var onlinePrice string
+	var offlinePrice string
+	err := db.QueryRow(`select category, description, online_price, offline_price, img_path from product_info where category=?`, brandName).Scan(&name, &description, &onlinePrice, &offlinePrice, &imgUrl)
+	brand := BrandInfo{Name: name, Description: description, ImgUrl: imgUrl, OnlinePrice: onlinePrice, OfflinePrice: offlinePrice}
+	if err != nil {
+		fmt.Printf("scan failed, err: %v\n", err)
+		return brand
+	}
+	fmt.Println("query success!")
+	// fmt.Printf("category: %s, description: %s, price: %f\n", category, description, price)
+	return brand
 }
 
 func insertUserRow(id int, username string, password string, userid int) {
@@ -179,7 +204,7 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 	// FormFile returns the first file for the given key `myFile`
 	// it also returns the FileHeader so we can get the Filename,
 	// the Header and the size of the file
-	file, handler, err := r.FormFile("myFile")
+	file, _, err := r.FormFile("myFile")
 	userId := r.FormValue("userid")
 
 	if err != nil {
@@ -189,10 +214,10 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	defer file.Close()
-	fmt.Printf("userid: %s\n", userId)
-	fmt.Printf("Uploaded File: %+v\n", handler.Filename)
-	fmt.Printf("File Size: %+v\n", handler.Size)
-	fmt.Printf("MIME Header: %+v\n", handler.Header)
+	// fmt.Printf("userid: %s\n", userId)
+	// fmt.Printf("Uploaded File: %+v\n", handler.Filename)
+	// fmt.Printf("File Size: %+v\n", handler.Size)
+	// fmt.Printf("MIME Header: %+v\n", handler.Header)
 
 	// Create a temporary file within our temp-images directory that follows
 	// a particular naming pattern
@@ -215,6 +240,27 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 	tempFile.Write(fileBytes)
 	// return that we have successfully uploaded our file!
 	fmt.Fprintf(w, "Successfully Uploaded File\n")
+
+	// predict class, use python file
+	class := predict(filename)
+	fmt.Println(class)
+
+	// retrieve class information from database
+	brand := queryClassByRow(class)
+	// brandName := brand.Name
+	// brandDesc := brand.Description
+	// brandPrice := brand.Price
+	// brandImgUrl := brand.ImgUrl
+	brandJson, err := json.Marshal(brand)
+	if err != nil {
+		log.Fatalf("Error happened in JSON marshal. Err: %s", err)
+	}
+
+	// return img and class name
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(brandJson)
+
 }
 
 func getFile(w http.ResponseWriter, r *http.Request) {
@@ -308,13 +354,13 @@ func main() {
 	// insertRow()
 	// updateRow()
 	// deleteRow()
-
+	fs := http.FileServer(http.Dir("./classImg"))
+	http.Handle("/", fs)
 	http.HandleFunc("/getuser", searchUserByName)
 	http.HandleFunc("/getproduct", searchProductByName)
 	http.HandleFunc("/insertuser", insertUser)
 	http.HandleFunc("/insertproduct", insertProduct)
 	http.HandleFunc("/postimg", uploadFile)
 	http.HandleFunc("/getimg", getFile)
-
-	log.Fatal(http.ListenAndServe(":4000", nil))
+	log.Fatal(http.ListenAndServe(":8000", nil))
 }
