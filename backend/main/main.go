@@ -54,9 +54,9 @@ type BrandInfo struct {
 	Id           int
 	Name         string
 	Description  string
-	ImgUrl       any
-	OnlinePrice  any
-	OfflinePrice any
+	ImgUrl       string
+	OnlinePrice  string
+	OfflinePrice string
 }
 
 type BrandWithRate struct {
@@ -138,10 +138,45 @@ func queryClassByRow(brandName string) BrandInfo {
 	var id int
 	var name string
 	var description string
-	var imgUrl any
-	var onlinePrice any
-	var offlinePrice any
+	var imgUrl string
+	var onlinePrice string
+	var offlinePrice string
 	err := db.QueryRow(`select id, category, description, online_price, offline_price, img_path from product_info where category=?`, brandName).Scan(&id, &name, &description, &onlinePrice, &offlinePrice, &imgUrl)
+	brand := BrandInfo{Id: id, Name: name, Description: description, ImgUrl: imgUrl, OnlinePrice: onlinePrice, OfflinePrice: offlinePrice}
+	if err != nil {
+		fmt.Printf("scan failed, err: %v\n", err)
+		return brand
+	}
+	fmt.Println(brandName)
+	fmt.Println("query success!")
+	// fmt.Printf("category: %s, description: %s, price: %f\n", category, description, price)
+	return brand
+}
+
+func queryClassById(id int) BrandInfo {
+	var name string
+	var description string
+	var imgUrl string
+	var onlinePrice string
+	var offlinePrice string
+	err := db.QueryRow(`select id, category, description, online_price, offline_price, img_path from product_info where id=?`, id).Scan(&id, &name, &description, &onlinePrice, &offlinePrice, &imgUrl)
+	brand := BrandInfo{Id: id, Name: name, Description: description, ImgUrl: imgUrl, OnlinePrice: onlinePrice, OfflinePrice: offlinePrice}
+	if err != nil {
+		fmt.Printf("scan failed, err: %v\n", err)
+		return brand
+	}
+	fmt.Println("query success!")
+	// fmt.Printf("category: %s, description: %s, price: %f\n", category, description, price)
+	return brand
+}
+
+func queryClassById(id int) BrandInfo {
+	var name string
+	var description string
+	var imgUrl string
+	var onlinePrice string
+	var offlinePrice string
+	err := db.QueryRow(`select id, category, description, online_price, offline_price, img_path from product_info where id=?`, id).Scan(&id, &name, &description, &onlinePrice, &offlinePrice, &imgUrl)
 	brand := BrandInfo{Id: id, Name: name, Description: description, ImgUrl: imgUrl, OnlinePrice: onlinePrice, OfflinePrice: offlinePrice}
 	if err != nil {
 		fmt.Printf("scan failed, err: %v\n", err)
@@ -222,6 +257,13 @@ func deleteRow() {
 	fmt.Printf("delete success, affected rows:%d\n", n)
 }
 
+func asyncQueryForBrandInfo(brands *[]BrandWithRate, class string, index int) {
+	fmt.Println(class)
+	brand := queryClassByRow(class)
+	brandWithIndex := BrandWithRate{Brand: brand, Rate: index}
+	*brands = append(*brands, brandWithIndex)
+}
+
 func uploadFile(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
@@ -246,7 +288,7 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 	tempFile, err := ioutil.TempFile("data", "upload-*.png")
 	filename := strings.Split(tempFile.Name(), "/")[1]
 
-	insertImgRow(filename, userId)
+	go insertImgRow(filename, userId)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -265,7 +307,6 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 
 	// predict class, use python file
 	class := predict(filename)
-	fmt.Println(class)
 
 	brands := []BrandWithRate{}
 
@@ -275,9 +316,7 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 	for _, c := range class {
 		fmt.Println(c)
 		index++
-		brand := queryClassByRow(c)
-		brandWithIndex := BrandWithRate{Brand: brand, Rate: index}
-		brands = append(brands, brandWithIndex)
+		go asyncQueryForBrandInfo(&brands, c, index)
 	}
 	brandJson, err := json.Marshal(brands)
 	// return img and class name
@@ -300,6 +339,7 @@ func getFile(w http.ResponseWriter, r *http.Request) {
 }
 
 func getUsrHistory(w http.ResponseWriter, r *http.Request) {
+	var result []BrandInfo
 	userid := r.FormValue("userid")
 	intUserid, err := strconv.Atoi(userid)
 	if err != nil {
@@ -309,18 +349,33 @@ func getUsrHistory(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println(person.History)
 
-	string_slice := strings.Split(person.History, "")
+	string_slice := strings.Split(person.History, ",")
 
 	fmt.Println(string_slice)
 
-	jsonResp, err := json.Marshal(person)
+	for i := 0; i < len(string_slice); i++ {
+		x, err := strconv.Atoi(string_slice[i])
+		productinfo := queryClassById(x)
+		if err != nil {
+			fmt.Println(err)
+		}
+		// jsonResp, err := json.Marshal(productinfo)
+		// if err != nil {
+		// 	log.Fatalf("Error happened in JSON marshal. Err: %s", err)
+		// }
+		// var a = make(map[string]any)
+		// json.Unmarshal(jsonResp, &a)
+		// fmt.Println(a)
+		// w.Write(jsonResp)
+		result = append(result, productinfo)
+
+	}
+	jsonResp, err := json.Marshal(result)
 	if err != nil {
 		log.Fatalf("Error happened in JSON marshal. Err: %s", err)
 	}
-	var a = make(map[string]any)
-	json.Unmarshal(jsonResp, &a)
-	fmt.Println(a)
 	w.Write(jsonResp)
+
 }
 
 func searchUserByName(w http.ResponseWriter, r *http.Request) {
@@ -397,12 +452,6 @@ func main() {
 		fmt.Printf("init db failed, err: %v\n", err)
 		return
 	}
-	// queryRowByName("Tom")
-	// queryMultiRow()
-	// insertRow()
-	// Request name
-	// updateRow()
-	// deleteRow()
 	fs := http.FileServer(http.Dir("./classImg"))
 	http.Handle("/", fs)
 	http.HandleFunc("/getuser", searchUserByName)
