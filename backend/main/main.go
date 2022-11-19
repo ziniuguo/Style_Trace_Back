@@ -6,9 +6,12 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"math"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/gorilla/mux"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -247,6 +250,7 @@ func asyncQueryForBrandInfo(brands *[]BrandWithRate, class string, index int) {
 }
 
 func uploadFile(w http.ResponseWriter, r *http.Request) {
+
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
 
@@ -321,43 +325,45 @@ func getFile(w http.ResponseWriter, r *http.Request) {
 }
 
 func getUsrHistory(w http.ResponseWriter, r *http.Request) {
+
+	first := r.URL.Query().Get("first")
+	first_int := 0
+	last := r.URL.Query().Get("last")
+	if first != "" {
+		first_int, _ = strconv.Atoi(first)
+	}
+
 	var result []BrandInfo
-	userid := r.FormValue("userid")
+	userid := r.URL.Query().Get("userid")
 	intUserid, err := strconv.Atoi(userid)
 	if err != nil {
 		fmt.Println(err)
 	}
 	person := queryUserRowByUsrID(intUserid)
 
-	fmt.Println(person.History)
-
 	string_slice := strings.Split(person.History, ",")
 
-	fmt.Println(string_slice)
+	last_int := len(string_slice)
+	first_int = int(math.Min(float64(first_int), float64(len(string_slice))))
 
-	for i := 0; i < len(string_slice); i++ {
+	if last != "" {
+		last_int, _ = strconv.Atoi(last)
+		last_int = int(math.Min(float64(last_int), float64(len(string_slice))))
+	}
+
+	for i := first_int; i < last_int; i++ {
 		x, err := strconv.Atoi(string_slice[i])
 		productinfo := queryClassById(x)
 		if err != nil {
 			fmt.Println(err)
 		}
-		// jsonResp, err := json.Marshal(productinfo)
-		// if err != nil {
-		// 	log.Fatalf("Error happened in JSON marshal. Err: %s", err)
-		// }
-		// var a = make(map[string]any)
-		// json.Unmarshal(jsonResp, &a)
-		// fmt.Println(a)
-		// w.Write(jsonResp)
 		result = append(result, productinfo)
-
 	}
 	jsonResp, err := json.Marshal(result)
 	if err != nil {
 		log.Fatalf("Error happened in JSON marshal. Err: %s", err)
 	}
 	w.Write(jsonResp)
-
 }
 
 func searchUserByName(w http.ResponseWriter, r *http.Request) {
@@ -434,14 +440,15 @@ func main() {
 		fmt.Printf("init db failed, err: %v\n", err)
 		return
 	}
+	router := mux.NewRouter()
 	fs := http.FileServer(http.Dir("./classImg"))
 	http.Handle("/", fs)
-	http.HandleFunc("/getuser", searchUserByName)
-	http.HandleFunc("/getproduct", searchProductByName)
-	http.HandleFunc("/insertuser", insertUser)
-	http.HandleFunc("/insertproduct", insertProduct)
-	http.HandleFunc("/postimg", uploadFile)
-	http.HandleFunc("/getimg", getFile)
-	http.HandleFunc("/getUsrHistory", getUsrHistory)
-	log.Fatal(http.ListenAndServe(":8000", nil))
+	router.HandleFunc("/getuser", searchUserByName)
+	router.HandleFunc("/getproduct", searchProductByName)
+	router.HandleFunc("/insertuser", insertUser)
+	router.HandleFunc("/insertproduct", insertProduct)
+	router.HandleFunc("/postimg", uploadFile).Methods("POST")
+	router.HandleFunc("/getimg", getFile)
+	router.HandleFunc("/getusrhistory", getUsrHistory)
+	log.Fatal(http.ListenAndServe(":8000", router))
 }
