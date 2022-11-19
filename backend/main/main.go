@@ -50,11 +50,17 @@ type ProductInfo struct {
 }
 
 type BrandInfo struct {
+	Id           int
 	Name         string
 	Description  string
 	ImgUrl       any
 	OnlinePrice  any
 	OfflinePrice any
+}
+
+type BrandWithRate struct {
+	Brand BrandInfo
+	Rate  int
 }
 
 func queryUserRowByName(searchName any) UserInfo {
@@ -110,13 +116,14 @@ func queryImgRowByUserId(userId int) []string {
 }
 
 func queryClassByRow(brandName string) BrandInfo {
+	var id int
 	var name string
 	var description string
 	var imgUrl any
 	var onlinePrice any
 	var offlinePrice any
-	err := db.QueryRow(`select category, description, online_price, offline_price, img_path from product_info where category=?`, brandName).Scan(&name, &description, &onlinePrice, &offlinePrice, &imgUrl)
-	brand := BrandInfo{Name: name, Description: description, ImgUrl: imgUrl, OnlinePrice: onlinePrice, OfflinePrice: offlinePrice}
+	err := db.QueryRow(`select id, category, description, online_price, offline_price, img_path from product_info where category=?`, brandName).Scan(&id, &name, &description, &onlinePrice, &offlinePrice, &imgUrl)
+	brand := BrandInfo{Id: id, Name: name, Description: description, ImgUrl: imgUrl, OnlinePrice: onlinePrice, OfflinePrice: offlinePrice}
 	if err != nil {
 		fmt.Printf("scan failed, err: %v\n", err)
 		return brand
@@ -241,16 +248,23 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 	class := predict(filename)
 	fmt.Println(class)
 
+	brands := []BrandWithRate{}
+
+	index := 0
+
 	// retrieve class information from database
 	for _, c := range class {
 		fmt.Println(c)
+		index++
 		brand := queryClassByRow(c)
-		brandJson, err := json.Marshal(brand)
-		if err != nil {
-			log.Fatalf("Error happened in JSON marshal. Err: %s", err)
-		}
-		// return img and class name
-		w.Write(brandJson)
+		brandWithIndex := BrandWithRate{Brand: brand, Rate: index}
+		brands = append(brands, brandWithIndex)
+	}
+	brandJson, err := json.Marshal(brands)
+	// return img and class name
+	w.Write(brandJson)
+	if err != nil {
+		log.Fatalf("Error happened in JSON marshal. Err: %s", err)
 	}
 }
 
