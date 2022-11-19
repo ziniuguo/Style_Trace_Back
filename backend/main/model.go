@@ -5,9 +5,10 @@ import (
 	"bufio"
 	"io"
 	"os/exec"
+	"strings"
 )
 
-func predict(path string) string {
+func predict(path string) []string {
 	cmd := exec.Command("python3.10", "predictor.py", "--file", path)
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
@@ -30,11 +31,12 @@ func predict(path string) string {
 	// cmd.Process.Kill()
 }
 
-func copyOutput(r io.Reader) string {
+func copyOutput(r io.Reader) []string {
 	scanner := bufio.NewScanner(r)
+	arr := []string{}
 	for scanner.Scan() {
 		// fmt.Println(scanner.Text())
-		return scanner.Text()
+		arr = append(arr, strings.ReplaceAll(scanner.Text(), "\"", ""))
 	}
-	return ""
+	return arr
 }
