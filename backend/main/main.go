@@ -109,7 +109,6 @@ func queryProductRowByName(searchCat any) ProductInfo {
 		return productInfo
 	}
 	fmt.Println("query success!")
-	// fmt.Printf("category: %s, description: %s, price: %f\n", category, description, price)
 	return productInfo
 }
 
