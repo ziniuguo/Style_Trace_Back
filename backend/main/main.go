@@ -170,23 +170,6 @@ func queryClassById(id int) BrandInfo {
 	return brand
 }
 
-func queryClassById(id int) BrandInfo {
-	var name string
-	var description string
-	var imgUrl string
-	var onlinePrice string
-	var offlinePrice string
-	err := db.QueryRow(`select id, category, description, online_price, offline_price, img_path from product_info where id=?`, id).Scan(&id, &name, &description, &onlinePrice, &offlinePrice, &imgUrl)
-	brand := BrandInfo{Id: id, Name: name, Description: description, ImgUrl: imgUrl, OnlinePrice: onlinePrice, OfflinePrice: offlinePrice}
-	if err != nil {
-		fmt.Printf("scan failed, err: %v\n", err)
-		return brand
-	}
-	fmt.Println("query success!")
-	// fmt.Printf("category: %s, description: %s, price: %f\n", category, description, price)
-	return brand
-}
-
 func insertUserRow(id int, username string, password string, userid int) {
 	ret, err := db.Exec("insert into user(id, username, password, userid) values (?,?,?,?)", id, username, password, userid)
 	if err != nil {
