@@ -52,9 +52,9 @@ type ProductInfo struct {
 type BrandInfo struct {
 	Name         string
 	Description  string
-	ImgUrl       string
-	OnlinePrice  string
-	OfflinePrice string
+	ImgUrl       any
+	OnlinePrice  any
+	OfflinePrice any
 }
 
 func queryUserRowByName(searchName any) UserInfo {
@@ -112,9 +112,9 @@ func queryImgRowByUserId(userId int) []string {
 func queryClassByRow(brandName string) BrandInfo {
 	var name string
 	var description string
-	var imgUrl string
-	var onlinePrice string
-	var offlinePrice string
+	var imgUrl any
+	var onlinePrice any
+	var offlinePrice any
 	err := db.QueryRow(`select category, description, online_price, offline_price, img_path from product_info where category=?`, brandName).Scan(&name, &description, &onlinePrice, &offlinePrice, &imgUrl)
 	brand := BrandInfo{Name: name, Description: description, ImgUrl: imgUrl, OnlinePrice: onlinePrice, OfflinePrice: offlinePrice}
 	if err != nil {
@@ -197,13 +197,13 @@ func deleteRow() {
 }
 
 func uploadFile(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+
 	fmt.Println("File Upload Endpoint Hit")
 	// Parse our multipart form, 10 << 20 specifies a maximum
 	// upload of 10 MB files.
 	r.ParseMultipartForm(10 << 20)
-	// FormFile returns the first file for the given key `myFile`
-	// it also returns the FileHeader so we can get the Filename,
-	// the Header and the size of the file
 	file, _, err := r.FormFile("myFile")
 	userId := r.FormValue("userid")
 
@@ -214,10 +214,6 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	defer file.Close()
-	// fmt.Printf("userid: %s\n", userId)
-	// fmt.Printf("Uploaded File: %+v\n", handler.Filename)
-	// fmt.Printf("File Size: %+v\n", handler.Size)
-	// fmt.Printf("MIME Header: %+v\n", handler.Header)
 
 	// Create a temporary file within our temp-images directory that follows
 	// a particular naming pattern
@@ -246,21 +242,16 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(class)
 
 	// retrieve class information from database
-	brand := queryClassByRow(class)
-	// brandName := brand.Name
-	// brandDesc := brand.Description
-	// brandPrice := brand.Price
-	// brandImgUrl := brand.ImgUrl
-	brandJson, err := json.Marshal(brand)
-	if err != nil {
-		log.Fatalf("Error happened in JSON marshal. Err: %s", err)
+	for _, c := range class {
+		fmt.Println(c)
+		brand := queryClassByRow(c)
+		brandJson, err := json.Marshal(brand)
+		if err != nil {
+			log.Fatalf("Error happened in JSON marshal. Err: %s", err)
+		}
+		// return img and class name
+		w.Write(brandJson)
 	}
-
-	// return img and class name
-	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(brandJson)
-
 }
 
 func getFile(w http.ResponseWriter, r *http.Request) {

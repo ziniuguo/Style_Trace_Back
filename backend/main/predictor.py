@@ -1,3 +1,4 @@
+import json
 import time
 import sys
 from argparse import ArgumentParser
@@ -44,13 +45,16 @@ try:
     result = model.predict(imgs, verbose=0)
     scores = result[0]
 
-    index = 0
-    max_score = 0
+
+    score_list = []
+    result = []
     for i in range(len(scores)):
-        if max_score < scores[i]:
-            max_score = scores[i]
-            index = i
-    print(dic[index])
+        score_list.append((scores[i], i))
+    score_list.sort(key=lambda x:-x[0])
+
+    for i in range(len(score_list)):
+        # result.append(dic[score_list[i][1]])
+        print(json.dumps(dic[score_list[i][1]]))
 
 except Exception as e:
     print(e)
