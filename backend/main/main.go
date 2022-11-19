@@ -128,6 +128,7 @@ func queryClassByRow(brandName string) BrandInfo {
 		fmt.Printf("scan failed, err: %v\n", err)
 		return brand
 	}
+	fmt.Println(brandName)
 	fmt.Println("query success!")
 	// fmt.Printf("category: %s, description: %s, price: %f\n", category, description, price)
 	return brand
@@ -203,6 +204,13 @@ func deleteRow() {
 	fmt.Printf("delete success, affected rows:%d\n", n)
 }
 
+func asyncQueryForBrandInfo(brands *[]BrandWithRate, class string, index int) {
+	fmt.Println(class)
+	brand := queryClassByRow(class)
+	brandWithIndex := BrandWithRate{Brand: brand, Rate: index}
+	*brands = append(*brands, brandWithIndex)
+}
+
 func uploadFile(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
@@ -227,7 +235,7 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 	tempFile, err := ioutil.TempFile("data", "upload-*.png")
 	filename := strings.Split(tempFile.Name(), "/")[1]
 
-	insertImgRow(filename, userId)
+	go insertImgRow(filename, userId)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -246,7 +254,6 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 
 	// predict class, use python file
 	class := predict(filename)
-	fmt.Println(class)
 
 	brands := []BrandWithRate{}
 
@@ -256,9 +263,7 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 	for _, c := range class {
 		fmt.Println(c)
 		index++
-		brand := queryClassByRow(c)
-		brandWithIndex := BrandWithRate{Brand: brand, Rate: index}
-		brands = append(brands, brandWithIndex)
+		go asyncQueryForBrandInfo(&brands, c, index)
 	}
 	brandJson, err := json.Marshal(brands)
 	// return img and class name
@@ -354,11 +359,7 @@ func main() {
 		fmt.Printf("init db failed, err: %v\n", err)
 		return
 	}
-	// queryRowByName("Tom")
-	// queryMultiRow()
-	// insertRow()
-	// updateRow()
-	// deleteRow()
+
 	fs := http.FileServer(http.Dir("./classImg"))
 	http.Handle("/", fs)
 	http.HandleFunc("/getuser", searchUserByName)
