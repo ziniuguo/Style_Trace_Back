@@ -41,6 +41,7 @@ type UserInfo struct {
 	Username string
 	Password string
 	Userid   int
+	History  string
 }
 
 type ProductInfo struct {
@@ -50,6 +51,7 @@ type ProductInfo struct {
 }
 
 type BrandInfo struct {
+	Id           int
 	Name         string
 	Description  string
 	ImgUrl       string
@@ -62,14 +64,32 @@ func queryUserRowByName(searchName any) UserInfo {
 	var username string
 	var pw string
 	var userid int
-	err := db.QueryRow("select id,username,password,userid from user where username=?", searchName).Scan(&id, &username, &pw, &userid)
-	userInfo := UserInfo{Id: id, Username: username, Password: pw, Userid: userid}
+	var history string
+	err := db.QueryRow("select id,username,password,userid,history from user where username=?", searchName).Scan(&id, &username, &pw, &userid, &history)
+	userInfo := UserInfo{Id: id, Username: username, Password: pw, Userid: userid, History: history}
 	if err != nil {
 		fmt.Printf("scan failed, err: %v\n", err)
 		return userInfo
 	}
 	fmt.Println("query success!")
-	// fmt.Printf("id: %d, username: %s, password: %s, userid: %d\n", userInfo.Id, userInfo.Username, userInfo.Password, userInfo.Userid)
+	// fmt.Printf("id: %d, username: %s, password: %s, userid: %d\n", userInfo.Id, userInfo.Username, userInfo.Password, userInfo.Userid, userInfo.History)
+	return userInfo
+}
+
+func queryUserRowByUsrID(searchName any) UserInfo {
+	var id int
+	var username string
+	var pw string
+	var userid int
+	var history string
+	err := db.QueryRow("select id,username,password,userid,history from user where userid=?", searchName).Scan(&id, &username, &pw, &userid, &history)
+	userInfo := UserInfo{Id: id, Username: username, Password: pw, Userid: userid, History: history}
+	if err != nil {
+		fmt.Printf("scan failed, err: %v\n", err)
+		return userInfo
+	}
+	fmt.Println("query success!")
+	// fmt.Printf("id: %d, username: %s, password: %s, userid: %d\n", userInfo.Id, userInfo.Username, userInfo.Password, userInfo.Userid, userInfo.History)
 	return userInfo
 }
 
@@ -275,6 +295,30 @@ func getFile(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func getUsrHistory(w http.ResponseWriter, r *http.Request) {
+	userid := r.FormValue("userid")
+	intUserid, err := strconv.Atoi(userid)
+	if err != nil {
+		fmt.Println(err)
+	}
+	person := queryUserRowByUsrID(intUserid)
+
+	fmt.Println(person.History)
+
+	string_slice := strings.Split(person.History, "")
+
+	fmt.Println(string_slice)
+
+	jsonResp, err := json.Marshal(person)
+	if err != nil {
+		log.Fatalf("Error happened in JSON marshal. Err: %s", err)
+	}
+	var a = make(map[string]any)
+	json.Unmarshal(jsonResp, &a)
+	fmt.Println(a)
+	w.Write(jsonResp)
+}
+
 func searchUserByName(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("searching user!")
 	enableCors(&w)
@@ -352,6 +396,7 @@ func main() {
 	// queryRowByName("Tom")
 	// queryMultiRow()
 	// insertRow()
+	// Request name
 	// updateRow()
 	// deleteRow()
 	fs := http.FileServer(http.Dir("./classImg"))
@@ -362,5 +407,6 @@ func main() {
 	http.HandleFunc("/insertproduct", insertProduct)
 	http.HandleFunc("/postimg", uploadFile)
 	http.HandleFunc("/getimg", getFile)
+	http.HandleFunc("/getUsrHistory", getUsrHistory)
 	log.Fatal(http.ListenAndServe(":8000", nil))
 }
