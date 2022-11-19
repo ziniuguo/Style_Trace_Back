@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
+
+    <title>Document</title>
+  </head>
+
+  <script>
+    $(document).ready(function(){
+      $("#search_user_button").click(function (){
+      console.log("test button")
+      $.post("http://localhost:4000/getuser", 
+      {username: $("#searchusername").val()},
+      function (data, satus) {
+        console.log(data)
+        alert("data sent!")
+      })})
+      $("#insert_user_button").click(function (){
+      console.log("insert button")
+      $.post("http://localhost:4000/insertuser", 
+      {
+        id: $("#insertuserid").val(),
+        username: $("#insertusername").val(),
+        password: $("#insertpassword").val(),
+        userid: $("#insertuserid").val(),
+    },
+      function (data, satus) {
+        console.log(data)
+        alert("data sent!")
+      })})
+
+
+      $("#search_product_button").click(function (){
+      console.log("test button")
+      $.post("http://localhost:4000/getproduct", 
+      {category: $("#searchproductname").val()},
+      function (data, satus) {
+        console.log(data)
+        alert("data sent!")
+      })})
+      $("#insert_product_button").click(function (){
+      console.log("insert button")
+      $.post("http://localhost:4000/insertproduct", 
+      {
+        category: $("#insertcategory").val(),
+        description: $("#insertdescription").val(),
+        price: $("#insertprice").val(),
+    },
+      function (data, satus) {
+        console.log(data)
+        alert("data sent!")
+      })})
+    })
+   
+  </script>
+  <body>
+    <br>
+    <div>
+      <form
+        enctype="multipart/form-data"
+        action="http://localhost:4000/postimg"
+        method="post">
+      <input type="file" name="myFile" />
+      <button type="submit" value="upload" id=""> Submit
+    </form>
+    </div>
+
+    <p>person name: <input type="text" id="searchusername"></p>
+    <button id="search_user_button">click me to search for a person</button>
+    <br>
+    <br>
+    <p>id: <input type="text" id="insertuserid"></p>
+    <p>username: <input type="text" id="insertusername"></p>
+    <p>password: <input type="text" id="insertpassword"></p>
+    <p>userid: <input type="text" id="insertuserid"></p>
+    <button id="insert_user_button">click me to insert a user</button>
+
+    <br>
+    product name: <input type="text" id="searchproductname">
+    <button id="search_product_button">click me to search for a product</button>
+    <br>
+    <br>
+    <p>category: <input type="text" id="insertcategory"></p>
+    <p>description: <input type="text" id="insertdescription"></p>
+    <p>price: <input type="text" id="insertprice"></p>
+    <button id="insert_product_button">click me to insert a product</button>
+
+    </table>
+  </body>
+</html>
