@@ -324,7 +324,7 @@ func getFile(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getUsrHistory(w http.ResponseWriter, r *http.Request) {
+func usrHistory(w http.ResponseWriter, r *http.Request) {
 
 	first := r.URL.Query().Get("first")
 	first_int := 0
@@ -449,6 +449,6 @@ func main() {
 	router.HandleFunc("/insertproduct", insertProduct)
 	router.HandleFunc("/postimg", uploadFile).Methods("POST")
 	router.HandleFunc("/getimg", getFile)
-	router.HandleFunc("/getusrhistory", getUsrHistory)
+	router.HandleFunc("/usrhistory", usrHistory)
 	log.Fatal(http.ListenAndServe(":8000", router))
 }
