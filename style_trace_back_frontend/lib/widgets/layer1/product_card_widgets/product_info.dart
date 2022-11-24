@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:style_trace_back_frontend/common/AppTextStyle.dart';
-import 'package:style_trace_back_frontend/widgets/product_card_widgets/price_label_bar.dart';
-import 'package:style_trace_back_frontend/widgets/product_card_widgets/product_title.dart';
+import 'package:style_trace_back_frontend/widgets/layer1/product_card_widgets/price_label_bar.dart';
+import 'package:style_trace_back_frontend/widgets/layer1/product_card_widgets/product_title.dart';
 
 class ProductInfo extends StatelessWidget {
   final String brand;

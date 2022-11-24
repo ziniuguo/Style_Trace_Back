@@ -9,9 +9,10 @@ AppBar topBar({String? pageName, Icon? leadingIcon, Icon? actionIcon}) {
     title: Text(pageName ?? "", style: AppTextStyle.pageHeader),
     leading: leadingIcon,
     actions: <Widget>[
-      Padding(
-          padding: EdgeInsets.only(right: 20.0),
-          child: GestureDetector(child: actionIcon))
+      if (actionIcon != null)
+        Padding(
+            padding: EdgeInsets.only(right: 20.0),
+            child: GestureDetector(child: actionIcon))
     ],
   );
 }

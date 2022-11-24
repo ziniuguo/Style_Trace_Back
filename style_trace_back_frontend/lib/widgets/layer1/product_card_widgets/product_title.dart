@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../common/AppTextStyle.dart';
+import '../../../common/AppTextStyle.dart';
 
 class ProductTitle extends StatelessWidget {
   final String brand;
