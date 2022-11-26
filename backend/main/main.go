@@ -43,7 +43,7 @@ type UserInfo struct {
 	Id       int
 	Username string
 	Password string
-	Userid   int
+	UserId   int
 	History  string
 }
 
@@ -69,7 +69,7 @@ func queryUserRowByName(searchName any) UserInfo {
 	var userid int
 	var history string
 	err := db.QueryRow("select id,username,password,userid,history from user where username=?", searchName).Scan(&id, &username, &pw, &userid, &history)
-	userInfo := UserInfo{Id: id, Username: username, Password: pw, Userid: userid, History: history}
+	userInfo := UserInfo{Id: id, Username: username, Password: pw, UserId: userid, History: history}
 	if err != nil {
 		fmt.Printf("scan failed, err: %v\n", err)
 		return userInfo
@@ -85,7 +85,7 @@ func queryUserRowByUsrID(searchName any) UserInfo {
 	var userid int
 	var history string
 	err := db.QueryRow("select id,username,password,userid,history from user where userid=?", searchName).Scan(&id, &username, &pw, &userid, &history)
-	userInfo := UserInfo{Id: id, Username: username, Password: pw, Userid: userid, History: history}
+	userInfo := UserInfo{Id: id, Username: username, Password: pw, UserId: userid, History: history}
 	if err != nil {
 		fmt.Printf("scan failed, err: %v\n", err)
 		return userInfo
