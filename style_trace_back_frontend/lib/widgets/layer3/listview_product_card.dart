@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
 import 'package:style_trace_back_frontend/models/product_model.dart';
 import '../layer2/product_card.dart';
 
@@ -12,6 +13,7 @@ class ListViewOfProductCard extends StatelessWidget {
         future: requestedData,
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           List<Product> allRecords = snapshot.data;
+          print(allRecords);
           if (snapshot.connectionState == ConnectionState.done) {
             if (snapshot.hasError) return Text(snapshot.error.toString());
             return ListView(
