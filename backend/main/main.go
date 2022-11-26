@@ -47,15 +47,10 @@ type UserInfo struct {
 	History  string
 }
 
-type ProductInfo struct {
-	Category    string
-	Description string
-	Price       float64
-}
-
 type BrandInfo struct {
 	Id           int
-	Name         string
+	Brand        string
+	Category     string
 	Description  string
 	ImgUrl       string
 	OnlinePrice  string
@@ -80,7 +75,6 @@ func queryUserRowByName(searchName any) UserInfo {
 		return userInfo
 	}
 	fmt.Println("query success!")
-	// fmt.Printf("id: %d, username: %s, password: %s, userid: %d\n", userInfo.Id, userInfo.Username, userInfo.Password, userInfo.Userid, userInfo.History)
 	return userInfo
 }
 
@@ -101,12 +95,16 @@ func queryUserRowByUsrID(searchName any) UserInfo {
 	return userInfo
 }
 
-func queryProductRowByName(searchCat any) ProductInfo {
-	var description string
+func queryProductRowByName(searchCat any) BrandInfo {
+	var id int
+	var brand string
 	var category string
-	var price float64
-	err := db.QueryRow("select category, description, price from product_info where category=?", searchCat).Scan(&category, &description, &price)
-	productInfo := ProductInfo{Category: category, Description: description, Price: price}
+	var description string
+	var imgUrl string
+	var onlinePrice string
+	var offlinePrice string
+	err := db.QueryRow(`select id, brand, category, description, online_price, offline_price, img_path from product_info where category=?`, searchCat).Scan(&id, &brand, &category, &description, &onlinePrice, &offlinePrice, &imgUrl)
+	productInfo := BrandInfo{Id: id, Brand: brand, Category: category, Description: description, ImgUrl: imgUrl, OnlinePrice: onlinePrice, OfflinePrice: offlinePrice}
 	if err != nil {
 		fmt.Printf("scan failed, err: %v\n", err)
 		return productInfo
@@ -136,40 +134,22 @@ func queryImgRowByUserId(userId int) []string {
 	return files
 }
 
-func queryClassByRow(brandName string) BrandInfo {
-	var id int
-	var name string
-	var description string
-	var imgUrl string
-	var onlinePrice string
-	var offlinePrice string
-	err := db.QueryRow(`select id, category, description, online_price, offline_price, img_path from product_info where category=?`, brandName).Scan(&id, &name, &description, &onlinePrice, &offlinePrice, &imgUrl)
-	brand := BrandInfo{Id: id, Name: name, Description: description, ImgUrl: imgUrl, OnlinePrice: onlinePrice, OfflinePrice: offlinePrice}
-	if err != nil {
-		fmt.Printf("scan failed, err: %v\n", err)
-		return brand
-	}
-	fmt.Println(brandName)
-	fmt.Println("query success!")
-	// fmt.Printf("category: %s, description: %s, price: %f\n", category, description, price)
-	return brand
-}
-
 func queryClassById(id int) BrandInfo {
-	var name string
+	var brand string
+	var category string
 	var description string
 	var imgUrl string
 	var onlinePrice string
 	var offlinePrice string
-	err := db.QueryRow(`select id, category, description, online_price, offline_price, img_path from product_info where id=?`, id).Scan(&id, &name, &description, &onlinePrice, &offlinePrice, &imgUrl)
-	brand := BrandInfo{Id: id, Name: name, Description: description, ImgUrl: imgUrl, OnlinePrice: onlinePrice, OfflinePrice: offlinePrice}
+	err := db.QueryRow(`select id, brand, category, description, online_price, offline_price, img_path from product_info where id=?`, id).Scan(&id, &brand, &category, &description, &onlinePrice, &offlinePrice, &imgUrl)
+	productInfo := BrandInfo{Id: id, Brand: brand, Category: category, Description: description, ImgUrl: imgUrl, OnlinePrice: onlinePrice, OfflinePrice: offlinePrice}
 	if err != nil {
 		fmt.Printf("scan failed, err: %v\n", err)
-		return brand
+		return productInfo
 	}
 	fmt.Println("query success!")
 	// fmt.Printf("category: %s, description: %s, price: %f\n", category, description, price)
-	return brand
+	return productInfo
 }
 
 func insertUserRow(id int, username string, password string, userid int) {
@@ -244,7 +224,7 @@ func deleteRow() {
 
 func asyncQueryForBrandInfo(brands *[]BrandWithRate, class string, index int) {
 	fmt.Println(class)
-	brand := queryClassByRow(class)
+	brand := queryProductRowByName(class)
 	brandWithIndex := BrandWithRate{Brand: brand, Rate: index}
 	*brands = append(*brands, brandWithIndex)
 }
@@ -259,7 +239,7 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 	// upload of 10 MB files.
 	r.ParseMultipartForm(10 << 20)
 	file, _, err := r.FormFile("myFile")
-	userId := r.FormValue("userid")
+	userId := r.FormValue("userId")
 
 	if err != nil {
 		fmt.Println("Error Retrieving the File")
