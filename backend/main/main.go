@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/gorilla/mux"
 
@@ -222,17 +223,16 @@ func deleteRow() {
 	fmt.Printf("delete success, affected rows:%d\n", n)
 }
 
-func asyncQueryForBrandInfo(brands *[]BrandWithRate, class string, index int) {
+func asyncQueryForBrandInfo(brands *[]BrandWithRate, class string, index int, wg *sync.WaitGroup) {
 	fmt.Println(class)
 	brand := queryProductRowByName(class)
 	brandWithIndex := BrandWithRate{Brand: brand, Rate: index}
 	*brands = append(*brands, brandWithIndex)
+	wg.Done()
+	fmt.Println(index)
 }
 
 func uploadFile(w http.ResponseWriter, r *http.Request) {
-
-	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Type", "application/json")
 
 	fmt.Println("File Upload Endpoint Hit")
 	// Parse our multipart form, 10 << 20 specifies a maximum
@@ -269,7 +269,7 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 	// write this byte array to our temporary file
 	tempFile.Write(fileBytes)
 	// return that we have successfully uploaded our file!
-	fmt.Fprintf(w, "Successfully Uploaded File\n")
+	// fmt.Fprintf(w, "Successfully Uploaded File\n")
 
 	// predict class, use python file
 	class := predict(filename)
@@ -278,17 +278,20 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 
 	index := 0
 
+	var wg sync.WaitGroup
 	// retrieve class information from database
 	for _, c := range class {
-		fmt.Println(c)
 		index++
-		go asyncQueryForBrandInfo(&brands, c, index)
+		wg.Add(1)
+		go asyncQueryForBrandInfo(&brands, c, index, &wg)
 	}
+
+	wg.Wait()
 	brandJson, err := json.Marshal(brands)
 	// return img and class name
 	w.Write(brandJson)
 	if err != nil {
-		log.Fatalf("Error happened in JSON marshal. Err: %s", err)
+		fmt.Println(err)
 	}
 }
 

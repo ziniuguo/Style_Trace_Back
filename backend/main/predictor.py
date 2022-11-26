@@ -15,14 +15,14 @@ try:
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
     tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
     dic = {
-        0:"Gucci_ophidia",
-        1:"Gucci_jackie",
-        2:"Gucci_sylvie",
-        3:"Gucci_marmont",
-        4:"Gucci_bamboo",
-        5:"Gucci_diana",
-        6:"Gucci_dionysus",
-        7:"Gucci_horsebit",
+        0:"Ophidia",
+        1:"Jackie",
+        2:"Sylvie",
+        3:"Marmont",
+        4:"Bamboo",
+        5:"Diana",
+        6:"Dionysus",
+        7:"Horsebit",
     }
 
     parser = ArgumentParser()
