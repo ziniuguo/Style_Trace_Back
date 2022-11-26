@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:styletraceback/src/common_widgets/widget_product_card/price_label.dart';
+import 'package:styletraceback/src/widgets/widget_product_card/price_label.dart';
 
 class PriceLabelBar extends StatelessWidget {
   final double onlinePrice;

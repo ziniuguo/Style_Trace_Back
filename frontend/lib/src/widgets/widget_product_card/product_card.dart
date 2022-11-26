@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:styletraceback/src/common_widgets/widget_product_card/product_info.dart';
+import 'package:styletraceback/src/widgets/widget_product_card/product_info.dart';
 import 'package:transparent_image/transparent_image.dart';
 
 class ProductCard extends StatelessWidget {
