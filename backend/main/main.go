@@ -12,8 +12,6 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/gorilla/mux"
-
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -423,15 +421,15 @@ func main() {
 		fmt.Printf("init db failed, err: %v\n", err)
 		return
 	}
-	router := mux.NewRouter()
+
 	fs := http.FileServer(http.Dir("./classImg"))
 	http.Handle("/", fs)
-	router.HandleFunc("/getuser", searchUserByName)
-	router.HandleFunc("/getproduct", searchProductByName)
-	router.HandleFunc("/insertuser", insertUser)
-	router.HandleFunc("/insertproduct", insertProduct)
-	router.HandleFunc("/postimg", uploadFile).Methods("POST")
-	router.HandleFunc("/getimg", getFile)
-	router.HandleFunc("/usrhistory", usrHistory)
-	log.Fatal(http.ListenAndServe(":8000", router))
+	http.HandleFunc("/getuser", searchUserByName)
+	http.HandleFunc("/getproduct", searchProductByName)
+	http.HandleFunc("/insertuser", insertUser)
+	http.HandleFunc("/insertproduct", insertProduct)
+	http.HandleFunc("/postimg", uploadFile)
+	http.HandleFunc("/getimg", getFile)
+	http.HandleFunc("/usrhistory", usrHistory)
+	log.Fatal(http.ListenAndServe(":8000", nil))
 }
