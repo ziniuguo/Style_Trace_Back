@@ -21,7 +21,7 @@ class ProductCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
         width: MediaQuery.of(context).size.width * 0.96,
-        height: MediaQuery.of(context).size.width * 0.3,
+        height: 120,
         child: Card(
             elevation: 10,
             shape: RoundedRectangleBorder(
