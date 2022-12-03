@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 class Product {
   String brand;
   String category;
@@ -17,12 +15,13 @@ class Product {
       required this.imagePath});
 
   factory Product.fromJson(Map<String, dynamic> json) {
+    print(json["Brand"]);
     return Product(
-        brand: json["brand"] as String,
-        category: json["category"] as String,
-        description: json["description"] as String,
-        onlinePrice: json["onlinePrice"] as double,
-        storePrice: json["storePrice"] as double,
-        imagePath: json["imagePath"] as String);
+        brand: json["Brand"] as String,
+        category: json["Category"] as String,
+        description: json["Description"] as String,
+        onlinePrice: json["OnlinePrice"] as double,
+        storePrice: json["OfflinePrice"] as double,
+        imagePath: json["ImgUrl"] as String);
   }
 }
