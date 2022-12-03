@@ -7,8 +7,8 @@ class ProductInfo extends StatelessWidget {
   final String brand;
   final String category;
   final String description;
-  final double onlinePrice;
-  final double storePrice;
+  final String onlinePrice;
+  final String storePrice;
   const ProductInfo(
       {super.key,
       required this.brand,

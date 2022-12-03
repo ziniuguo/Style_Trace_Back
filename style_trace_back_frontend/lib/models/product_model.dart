@@ -2,8 +2,8 @@ class Product {
   String brand;
   String category;
   String description;
-  double onlinePrice;
-  double storePrice;
+  String onlinePrice;
+  String storePrice;
   String imagePath;
 
   Product(
@@ -15,13 +15,12 @@ class Product {
       required this.imagePath});
 
   factory Product.fromJson(Map<String, dynamic> json) {
-    print(json["Brand"]);
     return Product(
         brand: json["Brand"] as String,
         category: json["Category"] as String,
         description: json["Description"] as String,
-        onlinePrice: json["OnlinePrice"] as double,
-        storePrice: json["OfflinePrice"] as double,
+        onlinePrice: json["OnlinePrice"] as String,
+        storePrice: json["OnlinePrice"] as String,
         imagePath: json["ImgUrl"] as String);
   }
 }

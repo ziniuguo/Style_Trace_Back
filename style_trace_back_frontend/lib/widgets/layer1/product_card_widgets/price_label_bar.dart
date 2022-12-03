@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:style_trace_back_frontend/widgets/layer1/product_card_widgets/price_label.dart';
 
 class PriceLabelBar extends StatelessWidget {
-  final double onlinePrice;
-  final double storePrice;
+  final String onlinePrice;
+  final String storePrice;
   final String onlineChannel = "Online";
   final String storeChannel = "In store";
   const PriceLabelBar(

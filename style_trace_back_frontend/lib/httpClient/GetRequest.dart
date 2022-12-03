@@ -10,14 +10,16 @@ Future<List<Product>> fetchUserHistory(
   final Dio dio = Dio();
   const String baseUrl = Config.baseUrl;
   const String productInfoURL = "$baseUrl/usrhistory";
+  List<Product> allRecords = [];
   Response res = await dio.get(productInfoURL, queryParameters: {
     "userid": userId,
     "last": toHistoryIndex,
     "first": fromHistoryIndex
   });
-
-  Iterable recordsList = jsonDecode(res.data);
-  List<Product> allRecords =
-      List<Product>.from(recordsList.map((item) => Product.fromJson(item)));
+  if (res.data != null) {
+    Iterable recordsList = jsonDecode(res.data);
+    allRecords =
+        List<Product>.from(recordsList.map((item) => Product.fromJson(item)));
+  }
   return allRecords;
 }

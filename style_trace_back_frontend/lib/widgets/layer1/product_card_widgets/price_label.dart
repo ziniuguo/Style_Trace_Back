@@ -3,7 +3,7 @@ import 'package:style_trace_back_frontend/common/AppColor.dart';
 import 'package:style_trace_back_frontend/common/AppTextStyle.dart';
 
 class PriceLabel extends StatelessWidget {
-  final double price;
+  final String price;
   final String shoppingChannel;
   const PriceLabel(
       {super.key, required this.shoppingChannel, required this.price});

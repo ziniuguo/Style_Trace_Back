@@ -5,8 +5,8 @@ class ProductCard extends StatelessWidget {
   final String brand;
   final String category;
   final String description;
-  final double onlinePrice;
-  final double storePrice;
+  final String onlinePrice;
+  final String storePrice;
   final String imagePath;
   const ProductCard(
       {super.key,
@@ -23,7 +23,7 @@ class ProductCard extends StatelessWidget {
         width: MediaQuery.of(context).size.width * 0.96,
         height: MediaQuery.of(context).size.width * 0.3,
         child: Card(
-            elevation: 10,
+            elevation: 5,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10.0),
             ),
