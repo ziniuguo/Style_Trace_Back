@@ -8,65 +8,9 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 
-
-class ImgScanPage extends StatelessWidget {
-  const ImgScanPage({Key? key}) : super(key: key);
-
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-          primarySwatch: Colors.blue,
-          highlightColor: const Color(0xFFD0996F),
-          backgroundColor: const Color(0xFFFDF5EC),
-          canvasColor: const Color(0xFFFDF5EC),
-          textTheme: TextTheme(
-            headline5: ThemeData.light()
-                .textTheme
-                .headline5!
-                .copyWith(color: const Color(0xFFBC764A)),
-          ),
-          iconTheme: IconThemeData(
-            color: Colors.grey[600],
-          ),
-          appBarTheme: const AppBarTheme(
-            backgroundColor: Color(0xFFBC764A),
-            centerTitle: false,
-            foregroundColor: Colors.white,
-            actionsIconTheme: IconThemeData(color: Colors.white),
-          ),
-          elevatedButtonTheme: ElevatedButtonThemeData(
-            style: ButtonStyle(
-              backgroundColor: MaterialStateColor.resolveWith(
-                      (states) => const Color(0xFFBC764A)),
-            ),
-          ),
-          outlinedButtonTheme: OutlinedButtonThemeData(
-            style: ButtonStyle(
-              foregroundColor: MaterialStateColor.resolveWith(
-                    (states) => const Color(0xFFBC764A),
-              ),
-              side: MaterialStateBorderSide.resolveWith(
-                      (states) => const BorderSide(color: Color(0xFFBC764A))),
-            ),
-          )),
-      home: const ScannerPage(title: 'Image Cropper Demo'),
-    );
-  }
-}
-
 class ScannerPage extends StatefulWidget {
-  final String title;
+  const ScannerPage({super.key});
 
-  const ScannerPage({
-    Key? key,
-    required this.title,
-  }) : super(key: key);
-
-
-  // _HomePageState createState() => _HomePageState();
   @override
   _ScannerPageState createState() => _ScannerPageState();
 }
@@ -78,22 +22,11 @@ class _ScannerPageState extends State<ScannerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: !kIsWeb ? AppBar(title: Text(widget.title)) : null,
+      appBar: AppBar(title: const Text("?????")),
       body: Column(
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (kIsWeb)
-            Padding(
-              padding: const EdgeInsets.all(kIsWeb ? 24.0 : 16.0),
-              child: Text(
-                widget.title,
-                style: Theme.of(context)
-                    .textTheme
-                    .displayMedium!
-                    .copyWith(color: Theme.of(context).highlightColor),
-              ),
-            ),
           Expanded(child: _body()),
         ],
       ),
@@ -116,7 +49,7 @@ class _ScannerPageState extends State<ScannerPage> {
         children: [
           Padding(
             padding:
-            const EdgeInsets.symmetric(horizontal: kIsWeb ? 24.0 : 16.0),
+                const EdgeInsets.symmetric(horizontal: kIsWeb ? 24.0 : 16.0),
             child: Card(
               elevation: 4.0,
               child: Padding(
@@ -224,16 +157,16 @@ class _ScannerPageState extends State<ScannerPage> {
                             'Upload an image to start',
                             style: kIsWeb
                                 ? Theme.of(context)
-                                .textTheme
-                                .headline5!
-                                .copyWith(
-                                color: Theme.of(context).highlightColor)
+                                    .textTheme
+                                    .headline5!
+                                    .copyWith(
+                                        color: Theme.of(context).highlightColor)
                                 : Theme.of(context)
-                                .textTheme
-                                .bodyText2!
-                                .copyWith(
-                                color:
-                                Theme.of(context).highlightColor),
+                                    .textTheme
+                                    .bodyText2!
+                                    .copyWith(
+                                        color:
+                                            Theme.of(context).highlightColor),
                           )
                         ],
                       ),
@@ -269,8 +202,7 @@ class _ScannerPageState extends State<ScannerPage> {
               toolbarTitle: 'Cropper',
               toolbarColor: Colors.deepOrange,
               toolbarWidgetColor: Colors.white,
-              hideBottomControls: true
-          ),
+              hideBottomControls: true),
         ],
       );
       File imageFile;
@@ -282,14 +214,12 @@ class _ScannerPageState extends State<ScannerPage> {
         String baseUrl = "http://localhost:5000";
         var request = http.MultipartRequest('POST', Uri.parse(baseUrl))
           ..fields['imgId'] = 'RandomInteger'
-          ..files.add(
-              http.MultipartFile(
-                'file',
-                imageFile.readAsBytes().asStream(),
-                imageFile.lengthSync(),
-                filename: imageFile.path.split("/").last,
-              )
-          );
+          ..files.add(http.MultipartFile(
+            'file',
+            imageFile.readAsBytes().asStream(),
+            imageFile.lengthSync(),
+            filename: imageFile.path.split("/").last,
+          ));
         debugL(request.fields);
         debugL(request.headers);
         debugL(request.files);
@@ -297,7 +227,6 @@ class _ScannerPageState extends State<ScannerPage> {
         debugL("======= status code: =======");
         // debugL(response.statusCode);
       }
-
 
       if (croppedFile != null) {
         setState(() {
@@ -309,7 +238,7 @@ class _ScannerPageState extends State<ScannerPage> {
 
   Future<void> _uploadImage() async {
     final pickedFile =
-    await ImagePicker().pickImage(source: ImageSource.gallery);
+        await ImagePicker().pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() {
         _pickedFile = pickedFile;
@@ -325,7 +254,7 @@ class _ScannerPageState extends State<ScannerPage> {
   }
 }
 
-void debugL(Object o)  {
+void debugL(Object o) {
   if (kDebugMode) {
     print("img_scanner.dart: - $o");
   }

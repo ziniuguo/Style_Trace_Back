@@ -31,15 +31,9 @@ class _IndexedStackPageState extends State<IndexedStackPage> {
       body: IndexedStack(
         alignment: Alignment.center,
         index: currentIndex,
-        children: [
-          Container(
-            color: Colors.red,
-            alignment: Alignment.center,
-            child: const Text('Page 1'),
-          ),
-          // RunningWidget.homePage,
-          const HomePage(),
-          const ImgScanPage(),
+        children: const [
+          HomePage(),
+          ScannerPage(),
         ],
       ),
       bottomNavigationBar: NavigationBar(
@@ -50,9 +44,8 @@ class _IndexedStackPageState extends State<IndexedStackPage> {
         },
         selectedIndex: currentIndex,
         destinations: const <Widget>[
-          NavigationDestination(icon: Icon(Icons.explore), label: 'Explore'),
           NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
-          NavigationDestination(icon: Icon(Icons.people), label: 'Saved')
+          NavigationDestination(icon: Icon(Icons.explore), label: 'Explore'),
         ],
       ),
       // bottomNavigationBar: BottomNavigationBar(
@@ -64,7 +57,6 @@ class _IndexedStackPageState extends State<IndexedStackPage> {
       //   items: const [
       //     BottomNavigationBarItem(icon: Icon(Icons.home), label: "Main"),
       //     BottomNavigationBarItem(icon: Icon(Icons.people), label: "Me"),
-      //     BottomNavigationBarItem(icon: Icon(Icons.explore), label: "Message"),
       //   ],
       // ),
     );
