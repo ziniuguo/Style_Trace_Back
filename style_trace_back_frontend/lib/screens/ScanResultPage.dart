@@ -1,12 +1,9 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:style_trace_back_frontend/httpClient/PostRequest.dart';
 import 'package:style_trace_back_frontend/widgets/layer3/listview_product_card.dart';
 
 import '../common/AppIcon.dart';
 import '../common/TopBar.dart';
 import '../httpClient/GetRequest.dart';
-import '../models/product_model.dart';
 
 class ScanResultPage extends StatefulWidget {
   const ScanResultPage({
