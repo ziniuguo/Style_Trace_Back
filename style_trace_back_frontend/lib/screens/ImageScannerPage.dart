@@ -1,6 +1,6 @@
+import 'dart:developer';
 import 'dart:io';
 
-import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -8,6 +8,8 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:style_trace_back_frontend/common/AppIcon.dart';
 import 'package:style_trace_back_frontend/common/TopBar.dart';
+
+import '../widgets/layer3/custom_buttons/custom_painter_handler.dart';
 
 class ImageScannerPage extends StatefulWidget {
   const ImageScannerPage({
@@ -30,11 +32,19 @@ class _ImageScannerPageState extends State<ImageScannerPage> {
           pageName: "Image Scanner",
           leadingIcon: AppIcon.topBarBack,
           actionIcon: AppIcon.searchIcon),
-      body: Column(
-        mainAxisSize: MainAxisSize.max,
-        crossAxisAlignment: CrossAxisAlignment.start,
+      body: Stack(
         children: [
-          Expanded(child: _body()),
+          _body(),
+          Positioned(
+            bottom: MediaQuery.of(context).size.height / 8,
+            left: 0,
+            child: const LeftCurveBtn(),
+          ),
+          Positioned(
+            bottom: MediaQuery.of(context).size.height / 8,
+            right: 0,
+            child: const RightCurveBtn(),
+          ),
         ],
       ),
     );
@@ -84,15 +94,15 @@ class _ImageScannerPageState extends State<ImageScannerPage> {
         ),
         child: kIsWeb ? Image.network(path) : Image.file(File(path)),
       );
-    // } else if (_pickedFile != null) {
-    //   final path = _pickedFile!.path;
-    //   return ConstrainedBox(
-    //     constraints: BoxConstraints(
-    //       maxWidth: 0.8 * screenWidth,
-    //       maxHeight: 0.7 * screenHeight,
-    //     ),
-    //     child: kIsWeb ? Image.network(path) : Image.file(File(path)),
-    //   );
+      // } else if (_pickedFile != null) {
+      //   final path = _pickedFile!.path;
+      //   return ConstrainedBox(
+      //     constraints: BoxConstraints(
+      //       maxWidth: 0.8 * screenWidth,
+      //       maxHeight: 0.7 * screenHeight,
+      //     ),
+      //     child: kIsWeb ? Image.network(path) : Image.file(File(path)),
+      //   );
     } else {
       return const SizedBox.shrink();
     }
@@ -161,48 +171,47 @@ class _ImageScannerPageState extends State<ImageScannerPage> {
   }
 
   Future<void> _cropImage(XFile pickedFile) async {
-      final croppedFile = await ImageCropper().cropImage(
-        sourcePath: pickedFile.path,
-        compressFormat: ImageCompressFormat.jpg,
-        compressQuality: 100,
-        aspectRatio: const CropAspectRatio(ratioX: 2, ratioY: 1),
-        uiSettings: [
-          AndroidUiSettings(
-              toolbarTitle: 'Cropper',
-              toolbarColor: Colors.deepOrange,
-              toolbarWidgetColor: Colors.white,
-              hideBottomControls: true),
-        ],
-      );
-      // TODO: send request to backend
-      // File imageFile;
-      // if (croppedFile != null) {
-      //   if (kDebugMode) {
-      //     _debugL(croppedFile.path);
-      //   }
-      //   imageFile = File(croppedFile.path);
-      //   String baseUrl = "http://localhost:5000";
-      //   var request = http.MultipartRequest('POST', Uri.parse(baseUrl))
-      //     ..fields['imgId'] = 'RandomInteger'
-      //     ..files.add(http.MultipartFile(
-      //       'file',
-      //       imageFile.readAsBytes().asStream(),
-      //       imageFile.lengthSync(),
-      //       filename: imageFile.path.split("/").last,
-      //     ));
-      //   _debugL(request.fields);
-      //   _debugL(request.headers);
-      //   _debugL(request.files);
-      //   // var response = await request.send();
-      //   _debugL("======= status code: =======");
-      //   // _debugL(response.statusCode);
-      // }
+    final croppedFile = await ImageCropper().cropImage(
+      sourcePath: pickedFile.path,
+      compressFormat: ImageCompressFormat.jpg,
+      compressQuality: 100,
+      aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
+      uiSettings: [
+        AndroidUiSettings(
+            toolbarTitle: 'Cropper',
+            toolbarColor: Colors.deepOrange,
+            toolbarWidgetColor: Colors.white,
+            hideBottomControls: true),
+      ],
+    );
+    // TODO: send request to backend
+    // File imageFile;
+    // if (croppedFile != null) {
+    //   if (kDebugMode) {
+    //     _debugL(croppedFile.path);
+    //   }
+    //   imageFile = File(croppedFile.path);
+    //   String baseUrl = "http://localhost:5000";
+    //   var request = http.MultipartRequest('POST', Uri.parse(baseUrl))
+    //     ..fields['imgId'] = 'RandomInteger'
+    //     ..files.add(http.MultipartFile(
+    //       'file',
+    //       imageFile.readAsBytes().asStream(),
+    //       imageFile.lengthSync(),
+    //       filename: imageFile.path.split("/").last,
+    //     ));
+    //   _debugL(request.fields);
+    //   _debugL(request.headers);
+    //   _debugL(request.files);
+    //   // var response = await request.send();
+    //   _debugL("======= status code: =======");
+    //   // _debugL(response.statusCode);
+    // }
 
-      if (croppedFile != null) {
-        setState(() {
-          _croppedFile = croppedFile;
-        });
-
+    if (croppedFile != null) {
+      setState(() {
+        _croppedFile = croppedFile;
+      });
     }
   }
 
@@ -216,7 +225,7 @@ class _ImageScannerPageState extends State<ImageScannerPage> {
 
   Future<void> _takePhoto() async {
     final pickedFile =
-    await ImagePicker().pickImage(source: ImageSource.camera);
+        await ImagePicker().pickImage(source: ImageSource.camera);
     if (pickedFile != null) {
       _cropImage(pickedFile);
     }
@@ -231,7 +240,5 @@ class _ImageScannerPageState extends State<ImageScannerPage> {
 }
 
 void _debugL(Object o) {
-  if (kDebugMode) {
-    print("img_scanner.dart: - $o");
-  }
+  log("img_scanner.dart: - $o");
 }
