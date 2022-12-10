@@ -32,7 +32,7 @@ class LeftCurveBtn extends StatelessWidget {
             left: 6,
             bottom: MediaQuery.of(context).size.height / 8 + 50,
             child: Image.asset(
-              'assets/images/left_btn.png',
+              'assets/images/pick_img_btn.png',
               scale: 0.9,
             ),
           )
@@ -70,7 +70,7 @@ class RightCurveBtn extends StatelessWidget {
             right: 6,
             bottom: MediaQuery.of(context).size.height / 8 + 50,
             child: Image.asset(
-              'assets/images/right_btn.png',
+              'assets/images/take_photo_btn.png',
               scale: 0.9,
             ),
           )
