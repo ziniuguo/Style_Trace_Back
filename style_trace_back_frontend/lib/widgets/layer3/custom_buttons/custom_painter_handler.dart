@@ -5,30 +5,76 @@ import 'package:flutter/material.dart';
 import 'custom_painter.dart';
 
 class LeftCurveBtn extends StatelessWidget {
-  const LeftCurveBtn({super.key});
+  const LeftCurveBtn({
+    super.key,
+    required this.toDo,
+    required this.size,
+  });
+
+  final void Function() toDo;
+  final Size size;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => _debugL('LeftCurveBtnPressed'),
-      child: CustomPaint(
-        size: const Size(50, 134),
-        painter: LeftCurveBtnPainter(),
+      onTap: toDo,
+      child: Stack(
+        children: [
+          Positioned(
+            bottom: MediaQuery.of(context).size.height / 8,
+            left: 0,
+            child: CustomPaint(
+              size: size,
+              painter: LeftCurveBtnPainter(),
+            ),
+          ),
+          Positioned(
+            left: 6,
+            bottom: MediaQuery.of(context).size.height / 8 + 50,
+            child: Image.asset(
+              'assets/images/left_btn.png',
+              scale: 0.9,
+            ),
+          )
+        ],
       ),
     );
   }
 }
 
 class RightCurveBtn extends StatelessWidget {
-  const RightCurveBtn({super.key});
+  const RightCurveBtn({
+    super.key,
+    required this.toDo,
+    required this.size,
+  });
+
+  final void Function() toDo;
+  final Size size;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => _debugL('RightCurveBtnPressed'),
-      child: CustomPaint(
-        size: const Size(50, 134),
-        painter: RightCurveBtnPainter(),
+      onTap: toDo,
+      child: Stack(
+        children: [
+          Positioned(
+            bottom: MediaQuery.of(context).size.height / 8,
+            right: 0,
+            child: CustomPaint(
+              size: size,
+              painter: RightCurveBtnPainter(),
+            ),
+          ),
+          Positioned(
+            right: 6,
+            bottom: MediaQuery.of(context).size.height / 8 + 50,
+            child: Image.asset(
+              'assets/images/right_btn.png',
+              scale: 0.9,
+            ),
+          )
+        ],
       ),
     );
   }

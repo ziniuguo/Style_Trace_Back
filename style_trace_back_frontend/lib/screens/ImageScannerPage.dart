@@ -22,40 +22,43 @@ class ImageScannerPage extends StatefulWidget {
 }
 
 class _ImageScannerPageState extends State<ImageScannerPage> {
-  // XFile? _pickedFile;
   CroppedFile? _croppedFile;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: topBar(
-          pageName: "Image Scanner",
-          leadingIcon: AppIcon.topBarBack,
-          actionIcon: AppIcon.searchIcon),
+        pageName: "Image Scanner",
+        leadingIcon: AppIcon.topBarBack,
+        actionIcon: AppIcon.searchIcon,
+      ),
       body: Stack(
         children: [
-          _body(),
-          Positioned(
-            bottom: MediaQuery.of(context).size.height / 8,
-            left: 0,
-            child: const LeftCurveBtn(),
-          ),
-          Positioned(
-            bottom: MediaQuery.of(context).size.height / 8,
-            right: 0,
-            child: const RightCurveBtn(),
-          ),
+          // left button
+          _croppedFile == null
+              ? LeftCurveBtn(
+                  toDo: () {
+                    _pickImage();
+                  },
+                  size: const Size(50, 134),
+                )
+              : const Center(),
+
+          // right button
+          _croppedFile == null
+              ? RightCurveBtn(
+                  toDo: () {
+                    _takePhoto();
+                  },
+                  size: const Size(50, 134),
+                )
+              : const Center(),
+
+          // img card
+          (_croppedFile == null ? const Center() : _imageCard()),
         ],
       ),
     );
-  }
-
-  Widget _body() {
-    if (_croppedFile != null) {
-      return _imageCard();
-    } else {
-      return _uploaderCard();
-    }
   }
 
   Widget _imageCard() {
@@ -94,15 +97,6 @@ class _ImageScannerPageState extends State<ImageScannerPage> {
         ),
         child: kIsWeb ? Image.network(path) : Image.file(File(path)),
       );
-      // } else if (_pickedFile != null) {
-      //   final path = _pickedFile!.path;
-      //   return ConstrainedBox(
-      //     constraints: BoxConstraints(
-      //       maxWidth: 0.8 * screenWidth,
-      //       maxHeight: 0.7 * screenHeight,
-      //     ),
-      //     child: kIsWeb ? Image.network(path) : Image.file(File(path)),
-      //   );
     } else {
       return const SizedBox.shrink();
     }
@@ -120,55 +114,43 @@ class _ImageScannerPageState extends State<ImageScannerPage> {
           tooltip: 'Delete',
           child: const Icon(Icons.delete),
         ),
-        // if (_croppedFile == null)
-        //   Padding(
-        //     padding: const EdgeInsets.only(left: 32.0),
-        //     child: FloatingActionButton(
-        //       onPressed: () {
-        //         _cropImage(); // entry: crop
-        //       },
-        //       backgroundColor: const Color(0xFFBC764A),
-        //       tooltip: 'Crop',
-        //       child: const Icon(Icons.crop),
-        //     ),
-        //   )
       ],
     );
   }
 
-  Widget _uploaderCard() {
-    return Center(
-      child: Card(
-        elevation: 4.0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16.0),
-        ),
-        child: SizedBox(
-          width: kIsWeb ? 380.0 : 320.0,
-          height: 300.0,
-          child: Column(
-            mainAxisSize: MainAxisSize.max,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ElevatedButton(
-                onPressed: () {
-                  _pickImage();
-                },
-                child: const Text('Upload'),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  _takePhoto();
-                },
-                child: const Text('Take Photo'),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  // Widget _uploaderCard() {
+  //   return Center(
+  //     child: Card(
+  //       elevation: 4.0,
+  //       shape: RoundedRectangleBorder(
+  //         borderRadius: BorderRadius.circular(16.0),
+  //       ),
+  //       child: SizedBox(
+  //         width: kIsWeb ? 380.0 : 320.0,
+  //         height: 300.0,
+  //         child: Column(
+  //           mainAxisSize: MainAxisSize.max,
+  //           crossAxisAlignment: CrossAxisAlignment.center,
+  //           mainAxisAlignment: MainAxisAlignment.center,
+  //           children: [
+  //             ElevatedButton(
+  //               onPressed: () {
+  //                 _pickImage();
+  //               },
+  //               child: const Text('Upload'),
+  //             ),
+  //             ElevatedButton(
+  //               onPressed: () {
+  //                 _takePhoto();
+  //               },
+  //               child: const Text('Take Photo'),
+  //             ),
+  //           ],
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 
   Future<void> _cropImage(XFile pickedFile) async {
     final croppedFile = await ImageCropper().cropImage(
@@ -233,7 +215,6 @@ class _ImageScannerPageState extends State<ImageScannerPage> {
 
   void _clear() {
     setState(() {
-      // _pickedFile = null;
       _croppedFile = null;
     });
   }
