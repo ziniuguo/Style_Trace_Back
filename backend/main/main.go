@@ -274,6 +274,8 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 
 	brands := []BrandWithRate{}
 
+	result := []BrandInfo{}
+
 	index := 0
 
 	var wg sync.WaitGroup
@@ -285,7 +287,19 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	wg.Wait()
-	brandJson, err := json.Marshal(brands)
+
+	cur := 1
+	for _ = range brands {
+		for _, r := range brands {
+			rate := r.Rate
+			if rate == cur {
+				result = append(result, r.Brand)
+				cur++
+			}
+		}
+	}
+
+	brandJson, err := json.Marshal(result)
 	// return img and class name
 	w.Write(brandJson)
 	if err != nil {
